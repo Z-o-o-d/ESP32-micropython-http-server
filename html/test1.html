@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>表格示例</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      border: 1px solid black;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <h1>表格示例</h1>
+  <form>
+    <label>输入字符串：</label>
+    <input type="text" name="input">
+    <input type="submit" value="提交">
+  </form>
+  <br>
+  <table>
+    <thead>
+      <tr>
+        <th>标题</th>
+        <th>内容</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    <!-- 表格内容将会在这里动态生成 -->
+    </tbody>
+  </table>
+
+  <script>
+    // 获取表单和表格元素
+    const form = document.querySelector('form');
+    const tableBody = document.querySelector('#table-body');
+
+    // 定义一个空对象，用于存储标题和内容
+    const data = {};
+
+    // 当表单提交时执行
+    form.addEventListener('submit', (event) => {
+      event.preventDefault(); // 阻止表单默认提交行为
+
+      // 获取用户输入的字符串
+      const input = event.target.input.value;
+
+      // 解析字符串为标题和内容
+      const [title, body] = input.split(':');
+
+      // 检查标题是否已经存在
+      const existingRow = tableBody.querySelector(`tr[data-title="${title}"]`);
+      if (existingRow) {
+        // 如果标题已经存在，则更新对应的内容
+        existingRow.querySelector('td:nth-child(2)').innerText = body;
+      } else {
+        // 如果标题不存在，则添加新的一行到表格中
+        data[title] = body;
+        const row = tableBody.insertRow();
+        row.setAttribute('data-title', title);
+        const cell1 = row.insertCell();
+        const cell2 = row.insertCell();
+        cell1.innerText = title;
+        cell2.innerText = body;
+      }
+
+      // 清空输入框
+      event.target.input.value = '';
+    });
+  </script>
+</body>
+</html>

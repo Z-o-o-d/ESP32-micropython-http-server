@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>表格示例</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      border: 1px solid black;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <h1>表格示例</h1>
+  <p id="status">正在连接到UDP服务器...</p>
+  <br>
+  <table>
+    <thead>
+      <tr>
+        <th>标题</th>
+        <th>内容</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    <!-- 表格内容将会在这里动态生成 -->
+    </tbody>
+  </table>
+
+  <script>
+    // 获取状态元素和表格元素
+    const status = document.querySelector('#status');
+    const tableBody = document.querySelector('#table-body');
+
+    // 定义一个空对象，用于存储标题和内容
+    const data = {};
+
+    // 创建WebSocket连接
+    const ws = new WebSocket('ws://127.0.0.1:61234');
+
+    // 当WebSocket连接打开时执行
+    ws.addEventListener('open', (event) => {
+      console.log('WebSocket连接已打开');
+      status.innerText = '已连接到UDP服务器';
+    });
+
+    // 当WebSocket收到消息时执行
+    ws.addEventListener('message', (event) => {
+      // 获取收到的消息
+      const message = event.data;
+
+      // 解析消息为标题和内容
+      const [title, body] = message.split(':');
+
+      // 检查标题是否已经存在
+      const existingRow = tableBody.querySelector(`tr[data-title="${title}"]`);
+      if (existingRow) {
+        // 如果标题已经存在，则更新对应的内容
+        existingRow.querySelector('td:nth-child(2)').innerText = body;
+      } else {
+        // 如果标题不存在，则添加新的一行到表格中
+        data[title] = body;
+        const row = tableBody.insertRow();
+        row.setAttribute('data-title', title);
+        const cell1 = row.insertCell();
+        const cell2 = row.insertCell();
+        cell1.innerText = title;
+        cell2.innerText = body;
+      }
+    });
+
+    // 当WebSocket连接关闭时执行
+    ws.addEventListener('close', (event) => {
+      console.log('WebSocket连接已关闭');
+      status.innerText = '与UDP服务器的连接已关闭';
+    });
+
+    // 当WebSocket连接出错时执行
+    ws.addEventListener('error', (event) => {
+      console.error('WebSocket连接出错', event);
+      status.innerText = '与UDP服务器的连接发生错误';
+    });
+  </script>
+</body>
+</html>
